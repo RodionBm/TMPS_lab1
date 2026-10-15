@@ -1,6 +1,9 @@
 # Bakery Management System
 
-A Java-based bakery management system built to demonstrate **three core SOLID design principles**: Single Responsibility, Open/Closed, and Dependency Inversion.
+- **Author:** Bulimar Rodion
+- **Group:** FAF-242
+- **Checked by:** Istrati D., university assistant
+- **Faculty:** FCIM, UTM
 
 ---
 
@@ -14,11 +17,13 @@ A Java-based bakery management system built to demonstrate **three core SOLID de
   - [3.3 Design Rationale](#33-design-rationale)
 - [4. Implementation](#4-implementation)
   - [4.1 Project Structure](#41-project-structure)
-  - [4.2 Getting Started](#42-getting-started)
+  - [4.2 Source Code](#42-source-code)
+  - [4.3 Getting Started](#43-getting-started)
 - [5. Sample Output](#5-sample-output)
 - [6. Extending the Program](#6-extending-the-program)
 - [7. Conclusion](#7-conclusion)
-- [8. License](#8-license)
+- [8. References](#8-references)
+- [9. License](#9-license)
 
 ---
 
@@ -31,6 +36,8 @@ This report presents a small bakery management system written in Java. The purpo
 - **D** — Dependency Inversion Principle (DIP)
 
 The program simulates a typical bakery day: baking bread, managing inventory, ordering supplies, serving customers with different payment methods, and cleaning the bakery. Each activity is modeled as a separate, focused component so that the design principles are visible directly in the code.
+
+The remaining two principles — Liskov Substitution (LSP) and Interface Segregation (ISP) — are not the focus of this particular example. The project deliberately narrows its scope to three principles in order to keep the demonstration clear and unambiguous.
 
 ---
 
@@ -64,10 +71,25 @@ The design deliberately avoids conditional branching for payment handling. Inste
 
 Figure 1 shows the class structure of the system.
 
-<img width="1283" height="539" alt="image" src="https://github.com/user-attachments/assets/fdb2c22b-3bac-41c6-ac97-f7f9e26862b5" />
-
+<img width="1283" height="539" alt="image" src="https://github.com/user-attachments/assets/8af118bc-54e1-4bc4-b789-291e5ede2aac" />
 
 **Figure 1:** UML class diagram of the Bakery Management System.
+
+**Figure 1 — Legend:**
+
+| Color | Meaning |
+|-------|---------|
+| Yellow | Abstract class |
+| Blue | Concrete class |
+| Pink | Single-responsibility component |
+| Cyan | Service using DIP |
+| Orange | Entry point |
+
+| Arrow | Meaning |
+|-------|---------|
+| Solid line, open triangle | Inheritance (`extends`) |
+| Dashed line, open "vee" | Uses / depends on |
+| Dotted line, open "vee" | Creates / instantiates |
 
 As shown in Figure 1:
 
@@ -172,7 +194,124 @@ Key observations:
 └── CustomerService.java                  # Serves customers
 ```
 
-### 4.2 Getting Started
+### 4.2 Source Code
+
+**`PaymentProcessor.java`**
+
+```java
+abstract class PaymentProcessor {
+    public abstract void processPayment(double amount);
+}
+```
+
+**`CreditCardPaymentProcessor.java`**
+
+```java
+class CreditCardPaymentProcessor extends PaymentProcessor {
+    @Override
+    public void processPayment(double amount) {
+        System.out.println("Processing credit card payment of $" + amount);
+    }
+}
+```
+
+**`PayPalPaymentProcessor.java`**
+
+```java
+class PayPalPaymentProcessor extends PaymentProcessor {
+    @Override
+    public void processPayment(double amount) {
+        System.out.println("Processing PayPal payment of $" + amount);
+    }
+}
+```
+
+**`BreadBaker.java`**
+
+```java
+class BreadBaker {
+    public void bakeBread() {
+        System.out.println("Baking high-quality bread...");
+    }
+}
+```
+
+**`InventoryManager.java`**
+
+```java
+class InventoryManager {
+    public void manageInventory() {
+        System.out.println("Managing inventory...");
+    }
+}
+```
+
+**`SupplyOrder.java`**
+
+```java
+class SupplyOrder {
+    public void orderSupplies() {
+        System.out.println("Ordering supplies...");
+    }
+}
+```
+
+**`BakeryCleaner.java`**
+
+```java
+class BakeryCleaner {
+    public void cleanBakery() {
+        System.out.println("Cleaning the bakery...");
+    }
+}
+```
+
+**`CustomerService.java`**
+
+```java
+class CustomerService {
+    private final PaymentProcessor paymentProcessor;
+
+    public CustomerService(PaymentProcessor paymentProcessor) {
+        this.paymentProcessor = paymentProcessor;
+    }
+
+    public void serveCustomer(double amount) {
+        System.out.println("Serving customer...");
+        paymentProcessor.processPayment(amount);
+    }
+}
+```
+
+**`Main.java`**
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        BreadBaker baker = new BreadBaker();
+        InventoryManager inventoryManager = new InventoryManager();
+        SupplyOrder supplyOrder = new SupplyOrder();
+        BakeryCleaner bakeryCleaner = new BakeryCleaner();
+
+        baker.bakeBread();
+        inventoryManager.manageInventory();
+        supplyOrder.orderSupplies();
+
+        CustomerService creditCardService =
+                new CustomerService(new CreditCardPaymentProcessor());
+        creditCardService.serveCustomer(100.00);
+
+        bakeryCleaner.cleanBakery();
+
+        System.out.println("New customer pays with PayPal...");
+        CustomerService paypalService =
+                new CustomerService(new PayPalPaymentProcessor());
+        paypalService.serveCustomer(150.00);
+    }
+}
+```
+
+### 4.3 Getting Started
 
 **Prerequisites:**
 
@@ -246,10 +385,19 @@ The Bakery Management System demonstrates three core SOLID principles:
 - **Open/Closed** — new payment methods can be added by extension, without modifying existing code.
 - **Dependency Inversion** — `CustomerService` depends on the `PaymentProcessor` abstraction, not on concrete implementations, and receives its dependency via constructor injection.
 
-The result is a small but well-structured program that is easy to read, easy to test, and easy to extend. Liskov Substitution and Interface Segregation were not the focus of this example and are therefore not explicitly demonstrated.
+The result is a small but well-structured program that is easy to read, easy to test, and easy to extend. Liskov Substitution and Interface Segregation were deliberately excluded from the scope of this example.
 
 ---
 
-## 8. License
+## 8. References
+
+1. Martin, R. C. (2017). *Clean Architecture: A Craftsman's Guide to Software Structure and Design*. Prentice Hall.
+2. Martin, R. C. (2002). *Agile Software Development: Principles, Patterns, and Practices*. Prentice Hall.
+3. Oracle. *The Java Tutorials — Object-Oriented Programming Concepts*. https://docs.oracle.com/javase/tutorial/java/concepts/
+4. Graphviz Documentation. https://graphviz.org/documentation/
+
+---
+
+## 9. License
 
 This project is provided as-is for educational purposes. Feel free to use, modify, and share it.
